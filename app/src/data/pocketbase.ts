@@ -1,12 +1,12 @@
 import PocketBase from 'pocketbase'
 
 import type {
-  TypedPocketBase,
   ProjectsResponse,
   TasksRecord,
   ProjectsRecord,
   TasksResponse,
-} from 'pocketbase-types'
+  TypedPocketBase,
+} from '../data/pocketbase-types'
 
 type TexpandProject = {
   project?: ProjectsResponse
@@ -60,6 +60,7 @@ function getStatus(project: ProjectsResponse) {
         const newProject = await pb.collection('projects')
           .create({
             name,
+            created_by: pb.authStore.model?.id,
             status: 'not started',
           })
           
@@ -78,6 +79,7 @@ function getStatus(project: ProjectsResponse) {
       ) {
         const newTask = await pb.collection('tasks').create({
           project: project_id,
+          created_by: pb.authStore.model?.id,
           text,
         })
       
@@ -138,13 +140,11 @@ function getStatus(project: ProjectsResponse) {
           expand: 'project',
         }
 
-        let tasks: TasksResponse<TexpandProject>[] = []
-      
-        tasks = await pb
-          .collection('tasks')
-          .getFullList(options)
-      
-        return tasks
+        const tasks: TasksResponse<TexpandProject>[] = await pb
+        .collection('tasks')
+        .getFullList(options)
+    
+      return tasks
       }
 
 
