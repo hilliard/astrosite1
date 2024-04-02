@@ -10,8 +10,13 @@ const project = await getProject(project_id)
 if (Astro.request.method === 'POST') {
   const formData = await Astro.request.formData()
   const task_text = formData.get('task_text') as string
-
-  await addTask(project_id, task_text)
+  try {
+    await addTask(project_id, task_text)
+  } catch (e) {
+    return new Response('An error occurred', {
+      status: 400,
+    })
+  }
 
   Astro.response.headers.set('HX-Redirect', `/app/project/${project_id}`)
 }

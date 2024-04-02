@@ -147,6 +147,30 @@ function getStatus(project: ProjectsResponse) {
       return tasks
       }
 
+      export function processImages(task: TasksResponse) {
+        type ImageItem = {
+          name: string
+          url: string
+          url_larger: string
+        }
+      
+        const images: ImageItem[] = []
+      
+        task.images?.map((image: string) => {
+          images.push({
+            name: image,
+            url: pb.files.getUrl(task, image, {
+              thumb: '0x200',
+            }),
+            url_larger: pb.files.getUrl(task, image, {
+              thumb: '0x800',
+            }),
+          })
+        })
+      
+        return images
+      }
+
 
       
       
