@@ -24,7 +24,7 @@ try {
       <div class='sm:hidden'>
         <HamburgerMenuButton />
       </div>
-      {project.name}
+    
       <span hx-get=`/app/modals/project/${project.id}/edit` hx-target='dialog'>
         {project.name}
       </span>

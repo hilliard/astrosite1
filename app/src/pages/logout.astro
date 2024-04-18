@@ -1,6 +1,7 @@
 ---
-import { isLoggedIn } from '@lib/auth'
 import { pb } from '@data/pocketbase'
+import { isLoggedIn } from '@lib/auth'
+
 
 if (!(await isLoggedIn(Astro.request))) {
   return Astro.redirect('/login')

@@ -1,7 +1,8 @@
 ---
 import IconDelete from '../icons/IconDelete.astro'
-import { processImages } from '@data/pocketbase'
 const { task } = Astro.props
+import { processImages } from '@data/pocketbase'
+
 
 const images = processImages(task)
 ---
@@ -11,13 +12,14 @@ const images = processImages(task)
     images.map((image, index) => (
     <div x-data=`{ showInOverlayTask${task.id}Image${index}: false, showDeleteButton: false }` class="inline">
         <div class="relative inline-block mb-4 mr-4 border-white rounded-xl" 
-          @click=`showInOverlayTask${task.id}Image${index} = true`>
+          @click=`showInOverlayTask${task.id}Image${index} = true`
           @mouseover="showDeleteButton = true"
           @mouseout="showDeleteButton = false">
           <img
             class="inline border-4 border-white rounded-xl object-contain"
             src={image.url}
             width="100"
+         />
             <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20" x-show="showDeleteButton" x-cloak>
             <button
               aria-label='Delete image'
@@ -30,7 +32,7 @@ const images = processImages(task)
               <IconDelete />
             </button>
           </div>
-          />
+        
         </div>
 
         <template x-if=`showInOverlayTask${task.id}Image${index}`>

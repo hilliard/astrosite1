@@ -14,7 +14,7 @@ posts = posts.sort(
 <LayoutSite title={'Blog'}>
   <ul class='py-10 px-6 mx-auto max-w-7xl space-y-10'>
     {
-      posts.map((post) => {
+      posts.map(post => {
         return (
           <li class='p-8 border rounded-lg'>
             <a href={`/blog/${post.slug}/`} class='text-2xl font-bold'>

@@ -1,10 +1,11 @@
 import PocketBase from 'pocketbase'
 
 import type {
+  ProjectsRecord,
   ProjectsResponse,
   TasksRecord,
-  ProjectsRecord,
   TasksResponse,
+  TeamsRecord,
   TypedPocketBase,
 } from '../data/pocketbase-types'
 
@@ -44,19 +45,31 @@ function getStatus(project: ProjectsResponse) {
   }
 }
 
-    export async function getProjects() {
+export async function getProjects({
+  team_id,
+}: {
+  team_id?: string
+}) {
+  const options = { filter: 'team = ""' }
+ 
+  if (team_id) {
+    options.filter = `team = "${team_id as string}"`
+  }
         const projects = await pb
           .collection('projects')
-          .getFullList()
+          .getFullList(options)
       
-        return projects
+       
         return projects.sort(
           (a, b) => getStatus(a) - getStatus(b)
         )
       }
 
 
-      export async function addProject(name: string) {
+      export async function addProject(
+        name: string,
+        team_id?: string
+      ) {
         const newProject = await pb.collection('projects')
           .create({
             name,
@@ -73,18 +86,15 @@ function getStatus(project: ProjectsResponse) {
         return project
       }
 
-      export async function addTask(
-        project_id: string,
-        text: string
-      ) {
-        const newTask = await pb.collection('tasks').create({
-          project: project_id,
-          created_by: pb.authStore.model?.id,
-          text,
-        })
-      
-        return newTask
-      }  
+export async function addTask(project_id: string, text: string) {
+  const newTask = await pb.collection('tasks').create({
+    project: project_id,
+    created_by: pb.authStore.model?.id,
+    text,
+  })
+
+  return newTask
+}
 
       export async function getTasks ({
         project_id = null,
@@ -92,7 +102,8 @@ function getStatus(project: ProjectsResponse) {
       }): Promise<TasksResponse<TexpandProject>[]> {
         const options = {
           filter: '',
-          expand: 'project',
+          sort: '-sorted_on, created',
+         
         }
 
         let filter = `completed = ${done}`
@@ -131,16 +142,23 @@ function getStatus(project: ProjectsResponse) {
         await pb.collection('tasks').update(id, data)
       } 
 
-      export async function getStarredTasks(): Promise<
-        TasksResponse<TexpandProject>[]
-     >{
+      export async function getStarredTasks({
+        team_id = null,
+      }): Promise<TasksResponse<TexpandProject>[]> {
         const options = {
           sort: '-starred_on',
           filter: 'starred = true && completed = false',
           expand: 'project',
         }
 
-        const tasks: TasksResponse<TexpandProject>[] = await pb
+        if (team_id) {
+          options.filter += ` && project.team = "${team_id}"`
+        } else {
+          options.filter += ` && project.team = ""`
+        }
+
+        let tasks: TasksResponse<TexpandProject>[]
+        tasks = await pb
         .collection('tasks')
         .getFullList(options)
     
@@ -170,8 +188,42 @@ function getStatus(project: ProjectsResponse) {
       
         return images
       }
-
-
+      export async function addTeam(name: string) {
+        let team = await pb.collection('teams').create({
+          name,
+          created_by: pb.authStore.model?.id,
+          status: 'inactive',
+        })
       
+        return team
+      }
+      export async function getTeam(id: string) {
+        const team = await pb.collection('teams').getOne(id)
       
+        return team
+      }
+      
+      export async function userIsTeamOwner(team_id: string) {
+        const team = await getTeam(team_id)
+        if (team.created_by === pb.authStore.model?.id) {
+          return true
+        }
+        return false
+      }
+      
+      export async function getTeams() {
+        const teams = await pb.collection('teams').getFullList()
+        return teams
+      }
+      
+      export async function deleteTeam(id: string) {
+        return await pb.collection('teams').delete(id)
+      }
+
+      export async function updateTeam(
+        id: string,
+        data: TeamsRecord
+      ) {
+        await pb.collection('teams').update(id, data)
+      }   
 
