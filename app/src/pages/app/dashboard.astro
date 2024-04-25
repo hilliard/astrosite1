@@ -1,18 +1,12 @@
 ---
-
 import LayoutApp from '@layouts/LayoutApp.astro'
 
 import TasksList from '../../components/app/tasks/TasksList.astro'
-
 import ProjectCard from '@components/app/projects/ProjectCard.astro'
-
 import AddNewProjectCard from '@components/app/projects/AddNewProjectCard.astro'
-
-
+import Invites from '@components/app/dashboard/Invites.astro'
 
 import HamburgerMenuButton from '@components/app/HamburgerMenuButton.astro'
-
-
 
 // const projects = await pb.collection('projects').getFullList()
 
@@ -34,13 +28,15 @@ const projects = await getProjects()
       Projects
     </div>
 
+    <Invites />
+
     <div id='starred-tasks-list'>
       <TasksList starred={true} />
     </div>
 
     <div class='space-y-6'>
       <ul class='grid gap-6 sm:grid-cols-2'>
-        {projects.map(project => <ProjectCard project={project} />)}
+        {projects.map((project) => <ProjectCard project={project} />)}
       </ul>
       <AddNewProjectCard />
     </div>
