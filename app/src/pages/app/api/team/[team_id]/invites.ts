@@ -3,7 +3,8 @@ import {
     getInvitesForTeam,
     getMembersOfTeam,
     getOwnerOfTeam,
-    getTeam
+    getTeam,
+    addActivity,
   } from '@src/data/pocketbase'
   
   import type { APIRoute } from 'astro'
@@ -40,6 +41,13 @@ import {
     }
   
     await addInvite(team_id, email)
+
+    await addActivity({
+      team: team.id,
+      project: '',
+      text: `Invite to "${team.name}" created for ${email}`,
+      type: 'invite_created'
+    })
   
     return new Response(null, {
       status: 204,

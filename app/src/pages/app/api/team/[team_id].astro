@@ -1,7 +1,7 @@
 ---
 export const partial = true
 
-import { deleteTeam, updateTeam, getTeam } from '@data/pocketbase'
+import { deleteTeam, updateTeam, getTeam, addActivity } from '@data/pocketbase'
 
 import { cancelSubscription, searchSubscriptionsByTeamId } from '@lib/stripe'
 
@@ -15,6 +15,13 @@ if (Astro.request.method === 'DELETE') {
     await cancelSubscription(res[0].id)
   }
   await deleteTeam(team_id)
+
+  await addActivity({
+    team: '',
+    project: '',
+    text: `Team ${team.name} deleted`,
+    type: 'team_delete',
+  })
 
   return new Response(null, {
     status: 204,
@@ -34,6 +41,13 @@ if (Astro.request.method === 'PUT') {
       await updateTeam(team_id, {
         name: team_name,
       })
+
+      await addActivity({
+        team: team_id,
+        project: '',
+        text: `Team ${old_name} renamed to ${team_name}`,
+        type: 'team_rename',
+      } 
 
       return new Response(null, {
         status: 204,

@@ -1,9 +1,11 @@
-import Stripe from 'stripe'
 import type { APIRoute } from 'astro'
+import Stripe from 'stripe'
 
-import { updateTeam, getTeam } from '@src/data/pocketbase'
-import { TeamsStatusOptions } from '@src/data/pocketbase-types'
 import { initStripe } from '@lib/stripe'
+
+import { updateTeam, getTeam, addActivity } from '@src/data/pocketbase'
+import { TeamsStatusOptions } from '@src/data/pocketbase-types'
+
 
 export const POST: APIRoute = async ({ request }) => {
   const webhook_secret =
@@ -41,6 +43,7 @@ export const POST: APIRoute = async ({ request }) => {
     const subscription = event.data.object
     const { metadata } = subscription
     const { team_id, team_page_url } = metadata
+    const team = await getTeam(team_id)
 
     const portal_url = (
       await stripe.billingPortal.sessions.create({
@@ -54,7 +57,13 @@ export const POST: APIRoute = async ({ request }) => {
       portal_url,
       stripe_subscription_id: subscription.id,
     })
-  }
+    await addActivity({
+      team: team_id,
+      project: '',
+      text: `Team ${team.name} subscription created`,
+      type: 'subscription_created'
+    })
+   }
 
   if (event.type === 'customer.subscription.deleted') {
     const { id: subscription_id, metadata } = event.data.object
@@ -74,7 +83,13 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     await updateTeam(team_id, {
-      status: TeamsStatusOptions.freezed,
+      status: TeamsStatusOptions.frozen,
+    })
+    await addActivity({
+      team: team_id,
+      project: '',
+      text: `Team ${team.name} subscription deleted`,
+      type: 'subscription_deleted'
     })
   }
 

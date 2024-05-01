@@ -37,7 +37,7 @@ const is_owner = await userIsTeamOwner(team_id)
         team.status === 'frozen' && (
           <>
             <div class='p-10 mt-0 text-white rounded-lg shadow bg-zinc-800'>
-              Your team is freezed as the subscription got cancelled.
+              Your team is frozen as the subscription got cancelled.
               {is_owner && (
                 <p>
                   <a
@@ -54,7 +54,7 @@ const is_owner = await userIsTeamOwner(team_id)
             <div class='space-y-6'>
               <ul class='grid gap-6 sm:grid-cols-2'>
                 {projects.map((project) => (
-                  <ProjectCard project={project} freezed={true} />
+                  <ProjectCard project={project} frozen={true} />
                 ))}
               </ul>
             </div>
