@@ -85,6 +85,7 @@ export const POST: APIRoute = async ({ request }) => {
     await updateTeam(team_id, {
       status: TeamsStatusOptions.frozen,
     })
+    
     await addActivity({
       team: team_id,
       project: '',

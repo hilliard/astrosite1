@@ -1,5 +1,7 @@
 import PocketBase from 'pocketbase'
 
+import { getUserObjectFromDb } from '@lib/auth'
+
 import type {
   ProjectsRecord,
   ProjectsResponse,
@@ -10,7 +12,7 @@ import type {
   TeamsResponse,
   UsersResponse, 
   InvitesResponse,
-  ActivitiesResponse.
+  ActivitiesResponse,
 } from '../data/pocketbase-types'
 
 type TexpandMembers = {
@@ -341,12 +343,43 @@ export async function addTask(project_id: string, text: string) {
         })
       }
       
-      export async function getActivities() {
+      export async function getActivities({
+          team_id,
+          project_id,
+          user_id
+        }: {
+          team_id?: string
+          project_id?: string
+          user_id?: string
+        }) {
         const options = {
+          filter: '',
           sort: '-created',
           expand: 'team,project,user'
         }
-      
+        if (team_id) {
+          options.filter += `team = "${team_id}"`
+        }
+        if (project_id) {
+          if (options.filter.length === 0) {
+            options.filter += `project = "${project_id}"`
+          } else {
+            options.filter += ` && project = "${project_id}"`
+          }
+        }
+        if (user_id) {
+          if (options.filter.length === 0) {
+            options.filter += `user = "${user_id}"`
+          } else {
+            options.filter += ` && user = "${user_id}"`
+          }
+        }
+
+        if (!team_id && !project_id && !user_id) {
+          //@ts-expect-error
+          options.perPage = 100
+        }
+           
         //@ts-expect-error
         const activities: ActivitiesResponse<
           TexpandTeam,
@@ -358,3 +391,42 @@ export async function addTask(project_id: string, text: string) {
       
         return activities
       }
+
+      export async function getAllProjects() {
+        const projects = await pb
+          .collection('projects')
+          .getFullList()
+      
+        return projects.sort(
+          (a, b) => getStatus(a) - getStatus(b)
+        )
+      }
+
+      export async function getCollaborators() {
+        const teams = await getTeams()
+      
+        const collaborators: UsersResponse[] = []
+      
+        await Promise.all(
+          teams.map(async (team) => {
+            await Promise.all(
+              team.members.map(async (member) => {
+                const user = await getUserObjectFromDb(member)
+                if (
+                  !collaborators.find(
+                    (collaborator) =>
+                      collaborator.username === user.username
+                  )
+                ) {
+                  collaborators.push(user)
+                }
+              })
+            )
+            collaborators.push(await getOwnerOfTeam(team))
+          })
+        )
+      
+        return collaborators.sort((a, b) =>
+          a.username.localeCompare(b.username)
+        )
+      } 

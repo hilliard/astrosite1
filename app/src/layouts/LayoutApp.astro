@@ -27,6 +27,21 @@ const { title = 'Secretplan' } = Astro.props
       "
     />
 
+    <meta name='apple-mobile-web-app-capable' content='yes' />
+
+    <meta
+      name='theme-color'
+      content='#fff'
+      media='(prefers-color-scheme: light)'
+    />
+    <meta
+      name='theme-color'
+      content='#000'
+      media='(prefers-color-scheme: dark)'
+    />
+
+    <link rel='manifest' crossorigin='use-credentials' href='/manifest.json' />
+
     <script>
       import * as htmx from 'htmx.org'
       import Alpine from 'alpinejs'
@@ -46,6 +61,18 @@ const { title = 'Secretplan' } = Astro.props
       Alpine.start()
 
       htmx.process(document.body)
+    </script>
+
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('/service-worker.js')
+            .catch((error) => {
+              console.log('Service Worker registration failed: ', error)
+            })
+        })
+      }
     </script>
     <script is:inline>
       document.addEventListener('DOMContentLoaded', () => {

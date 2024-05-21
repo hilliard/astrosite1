@@ -1,6 +1,7 @@
 import { deleteInvite, addActivity, getInvite, getTeam } from '@src/data/pocketbase'
 
 import { getUserUsername } from '@lib/auth'
+
 import type { APIRoute } from 'astro'
 
 export const POST: APIRoute = async ({ params, request }) => {
